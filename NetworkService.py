@@ -1,14 +1,13 @@
 import requests
 from typing import TypeVar, List
 
-from OpenMeteoEndpoint import OpenMeteoEndpoint
 from Endpoint import Endpoint
 
 class NetworkService:
 
     T = TypeVar('T')
     
-    def request(endpoint: Endpoint, params) -> List[T]:
+    def request(endpoint: Endpoint, params) -> T:
         try:
             response = requests.request(
                 method=endpoint.method,
@@ -25,6 +24,3 @@ class NetworkService:
             response.encoding = "utf-8"
             return response.json()
 
-
-data = NetworkService.request(OpenMeteoEndpoint.FORECAST, {"latitude": 52.52, "longitude": 13.41})
-print(data)
