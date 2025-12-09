@@ -5,8 +5,7 @@ from pydantic import BaseModel
 
 import asyncio
 
-from WeatherService import WeatherService
-from WeatherService import WeatherPoint
+import weatherService
 
 app = FastAPI()
 
@@ -27,8 +26,8 @@ async def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 @app.get("/weather/current")
-def read_current_weather(latitude: float, longitude: float):
-    return WeatherService().get_current_weather(latitude=latitude, longitude=longitude)
+async def read_current_weather(latitude: float, longitude: float):
+    return weatherService.get_current_weather(latitude=latitude, longitude=longitude)
 
 @app.put("/items/{item_id}")
 async def update_item(item_id: int, item: Item):
