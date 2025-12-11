@@ -15,7 +15,6 @@ def get_current_weather(latitude: float, longitude: float) -> weatherPoint.Weath
     }
     try:
         data = networkService.request(OpenMeteoEndpoint.FORECAST, params)
-        print(data["current"])
         return weatherPoint.WeatherPoint(
             data["latitude"], 
             data["longitude"],
