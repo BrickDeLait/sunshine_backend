@@ -15,6 +15,9 @@ class WeatherEntry:
 class WeatherPoint:
     latitude: float
     longitude: float
+    min_temp_climate_ref: float
+    max_temp_climate_ref: float
+    precipitation_climate_ref: float
     weather_entries: List[WeatherEntry]
 
     def to_json(self):
