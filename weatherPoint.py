@@ -6,24 +6,24 @@ from typing import List
 class WeatherEntry:
     date: str
     temperature: float
-    wind_speed: float
+    apparent_temperature: float
     temperature_min: float
     temperature_max: float
-    precipitation_sum: float
+    precipitation: float
+    precipitation_probability: int
+    humidity: int
+    cloud_cover: int
+    direct_radiation: int
+    wind_speed: float
+    wind_direction: str
+    sunrise: str
+    sunset: str
 
 @dataclass
 class WeatherPoint:
     latitude: float
     longitude: float
-    min_temp_climate_ref: float
-    max_temp_climate_ref: float
-    precipitation_climate_ref: float
-    weather_entries: List[WeatherEntry]
-
-    def to_json(self):
-        data = {
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "weather_entries": self.weather_entries
-        }
-        return json.dumps(data)
+    timezone_abbreviation: str
+    current_weather: WeatherEntry
+    hourly_forecast: List[WeatherEntry]
+    daily_forecast: List[WeatherEntry]
