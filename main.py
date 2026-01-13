@@ -19,7 +19,10 @@ async def read_root():
 
 @app.get("/weather/current")
 async def read_current_weather(latitude: float, longitude: float):
-    return weatherService.get_current_weather(latitude=latitude, longitude=longitude)
+    try:
+        return weatherService.get_current_weather(latitude=latitude, longitude=longitude)
+    except WeatherServiceError as error: 
+        raise HTTPException(error.error_code, error.message)
 
 @app.get("/weather/forecast")
 async def read_forecast(latitude: float, longitude: float, forecast_type: str):

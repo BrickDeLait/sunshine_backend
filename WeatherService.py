@@ -13,7 +13,8 @@ def get_current_weather(latitude: float, longitude: float) -> weatherPoint.Weath
         "latitude": latitude, 
         "longitude": longitude,
         "timezone": 'auto',
-        "current": 'temperature_2m,apparent_temperature,precipitation,relative_humidity_2m,cloud_cover,direct_radiation,wind_speed_10m,wind_direction_10m'
+        "current": 'temperature_2m,apparent_temperature,precipitation,relative_humidity_2m,cloud_cover,direct_radiation,wind_speed_10m,wind_direction_10m',
+        "daily": "temperature_2m_min,temperature_2m_max",
         }
     
     try:
