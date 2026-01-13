@@ -22,7 +22,7 @@ async def read_current_weather(latitude: float, longitude: float):
     try:
         return weatherService.get_current_weather(latitude=latitude, longitude=longitude)
     except WeatherServiceError as error: 
-        raise HTTPException(error.error_code, error.message)
+        raise HTTPException(error.error_code, error.message) from error
 
 @app.get("/weather/forecast")
 async def read_forecast(latitude: float, longitude: float, forecast_type: str):
@@ -33,7 +33,7 @@ async def read_forecast(latitude: float, longitude: float, forecast_type: str):
             return weatherService.get_forecast(OpenMeteoForecastType.DAILY, latitude, longitude)
         raise WeatherServiceError(406, "The forecast type is not supported. Only HOURLY and DAILY are supported.")
     except WeatherServiceError as error:
-        raise HTTPException(error.error_code, error.message)
+        raise HTTPException(error.error_code, error.message) from error
     
 
 @app.get("/weather/historical")
