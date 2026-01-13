@@ -24,6 +24,4 @@ class WeatherPoint:
     latitude: float
     longitude: float
     timezone_abbreviation: str
-    current_weather: WeatherEntry
-    hourly_forecast: List[WeatherEntry]
-    daily_forecast: List[WeatherEntry]
+    weather: List[WeatherEntry]
