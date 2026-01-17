@@ -2,10 +2,9 @@
 from typing import List
 import datetime
 import dateutil.parser
-from dateutil.relativedelta import relativedelta
 
 import networkService
-import weatherPoint
+from DataModels import weatherPoint, climatePoint
 import openMeteoEndpoint
 
 def get_current_weather(latitude: float, longitude: float) -> weatherPoint.WeatherPoint:
@@ -18,15 +17,6 @@ def get_current_weather(latitude: float, longitude: float) -> weatherPoint.Weath
         }
     
     try:
-
-        #current_date = datetime.datetime.now()
-        #past_date = current_date + relativedelta(years= -30)
-        #historical_data = get_historical_weather(
-        #    latitude= latitude,
-        #    longitude= longitude,
-        #    start_date= past_date.strftime("%Y-%m-%d"),
-        #    end_date= current_date.strftime("%Y-%m-%d"),
-        #)
         data = networkService.request(openMeteoEndpoint.OpenMeteoEndpoint.FORECAST, params)
 
         return weatherPoint.WeatherPoint(
@@ -84,6 +74,29 @@ def get_forecast(forecast_type: openMeteoEndpoint.OpenMeteoForecastType, latitud
         message= f"An error occured in get_forecast: {error}"
         print(message)
         raise openMeteoEndpoint.WeatherServiceError(500, message)
+    
+def get_climate_normals(latitude: float, longitude: float) -> climatePoint.ClimatePoint:
+    reference_from_date = "1991-01-01"
+    reference_to_date = "2020-12-31"
+
+    try:
+        historical_data = get_historical_weather(
+            latitude= latitude,
+            longitude= longitude,
+            start_date= reference_from_date,
+            end_date= reference_to_date,
+        )
+        print(f"data returned from climate API at : {datetime.datetime.now()}")
+        return climatePoint.ClimatePoint(
+            latitude,
+            longitude,
+            __process_historical_data(historical_data)
+        )
+    except Exception as error:
+        message= f"An error occured in get_climate_normals: {error}"
+        print(message)
+        raise openMeteoEndpoint.WeatherServiceError(500, message)
+
 
 def get_historical_weather(latitude: float, longitude: float, start_date: str, end_date: str):
     start_date_formatted = __convertStringToDatetime(start_date).strftime("%Y-%m-%d")
@@ -93,62 +106,32 @@ def get_historical_weather(latitude: float, longitude: float, start_date: str, e
         "longitude": longitude,
         "start_date": start_date_formatted,
         "end_date": end_date_formatted,
-        "daily": "temperature_2m_mean,wind_speed_10m_max,temperature_2m_min,temperature_2m_max,precipitation_sum",
+        "daily": "temperature_2m_mean,precipitation_sum,sunshine_duration",
         "timezone": "auto"
     }
     try:
-        data = networkService.request(OpenMeteoEndpoint.HISTORICAL, params)
-        return __process_historical_data(data)
+        data = networkService.request(openMeteoEndpoint.OpenMeteoEndpoint.HISTORICAL, params)
+        return data
     except Exception as error:
-        print(f"An error occured: {error}")
-        raise
+        message= f"An error occured in get_historical_weather: {error}"
+        print(message)
+        raise openMeteoEndpoint.WeatherServiceError(500, message)
 
 
 def __convertStringToDatetime(date_time) -> datetime.datetime:
     return dateutil.parser.isoparse(date_time)
 
-def __process_historical_data(data) -> weatherPoint.WeatherPoint:
-    result: List[weatherPoint.WeatherEntry] = []
+def __process_historical_data(data) -> List[climatePoint.ClimateNormal]:
+    result: List[climatePoint.ClimateNormal] = []
     for index, value in enumerate(data["daily"]["time"]):
         result.append(
-            weatherPoint.WeatherEntry(
+            climatePoint.ClimateNormal(
                 date= value,
                 temperature= data["daily"]["temperature_2m_mean"][index],
-                apparent_temperature= None,
-                temperature_min= data["daily"]["temperature_2m_min"][index],
-                temperature_max= data["daily"]["temperature_2m_max"][index],
                 precipitation= data["daily"]["precipitation_sum"][index],
-                humidity= None,
-                cloud_cover= None,
-                direct_radiation= None,
-                wind_speed= data["daily"]["wind_speed_10m_max"][index],
-                wind_direction= None
+                sunshine_duration= data["daily"]["sunshine_duration"][index]
             )
         )
-    
-    climate_normals = get_climatological_normals(result)
         
-    return weatherPoint.WeatherPoint(
-        data["latitude"],
-        data["longitude"],
-        climate_normals[0],
-        climate_normals[1],
-        climate_normals[2],
-        result
-    )
-
-def get_climatological_normals(data: List[weatherPoint.WeatherEntry]):
-    avg_temp_min_sum = 0
-    avg_temp_max_sum = 0
-    avg_precipitation_sum = 0
-    data_length = len(data)
-
-    for value in data:
-        avg_temp_min_sum += value.temperature_min
-        avg_temp_max_sum += value.temperature_max
-        avg_precipitation_sum += value.precipitation
-    
-    avg_temp_min = avg_temp_min_sum/data_length
-    avg_temp_max = avg_temp_max_sum/data_length
-    avg_precipitation = avg_precipitation_sum/data_length
-    return (avg_temp_min, avg_temp_max, avg_precipitation)
+    print(f"Finished processing data at : {datetime.datetime.now()}")
+    return result

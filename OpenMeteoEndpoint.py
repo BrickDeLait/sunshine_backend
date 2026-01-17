@@ -1,6 +1,6 @@
 from enum import Enum
 from Endpoint import Endpoint
-import weatherPoint
+from DataModels import weatherPoint
 
 class OpenMeteoEndpoint(Enum, metaclass=Endpoint):
     FORECAST = 1

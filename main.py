@@ -1,7 +1,5 @@
-from typing import Union
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 
 import asyncio
 
@@ -34,7 +32,14 @@ async def read_forecast(latitude: float, longitude: float, forecast_type: str):
         raise WeatherServiceError(406, "The forecast type is not supported. Only HOURLY and DAILY are supported.")
     except WeatherServiceError as error:
         raise HTTPException(error.error_code, error.message) from error
-    
+
+@app.get("/weather/climateNormals")
+async def read_climate_normals(latitude: float, longitude: float):
+    try:
+        return weatherService.get_climate_normals(latitude, longitude)
+    except WeatherServiceError as error:
+        raise HTTPException(error.error_code, error.message) from error
+
 
 @app.get("/weather/historical")
 async def read_historical_weather(latitude: float, longitude: float, start_date: str, end_date: str):
